@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CarManagementApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class MaintenanceController : ControllerBase
     {

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CarManagementApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class CarsController : ControllerBase
     {
@@ -105,7 +105,7 @@ namespace CarManagementApi.Controllers
 
             if (!string.IsNullOrWhiteSpace(brand))
             {
-                query = query.Where(c => c.Brand.ToLower() == brand.ToLower());
+                query = query.Where(c => c.Make.ToLower() == brand.ToLower());
             }
 
             if (startYear.HasValue && endYear.HasValue)
