@@ -16,14 +16,14 @@ namespace CarManagementApi.Controllers
             _context = context;
         }
 
-        // GET: api/cars
+        // GET: cars
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Car>>> GetCars()
         {
             return await _context.Cars.Include(c => c.Garages).ToListAsync();
         }
 
-        // GET: api/cars/{id}
+        // GET: cars/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<Car>> GetCar(int id)
         {
@@ -37,7 +37,7 @@ namespace CarManagementApi.Controllers
             return car;
         }
 
-        // POST: api/cars
+        // POST: cars
         [HttpPost]
         public async Task<ActionResult<Car>> CreateCar(Car car)
         {
@@ -47,7 +47,7 @@ namespace CarManagementApi.Controllers
             return CreatedAtAction(nameof(GetCar), new { id = car.Id }, car);
         }
 
-        // PUT: api/cars/{id}
+        // PUT: cars/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCar(int id, Car car)
         {
@@ -77,7 +77,7 @@ namespace CarManagementApi.Controllers
             return NoContent();
         }
 
-        // DELETE: api/cars/{id}
+        // DELETE: cars/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCar(int id)
         {

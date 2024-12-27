@@ -16,7 +16,7 @@ namespace CarManagementApi.Controllers
             _context = context;
         }
 
-        // GET: api/maintenance
+        // GET: maintenance
         [HttpGet]
         public async Task<ActionResult<IEnumerable<MaintenanceRequest>>> GetMaintenanceRequests()
         {
@@ -26,7 +26,7 @@ namespace CarManagementApi.Controllers
                 .ToListAsync();
         }
 
-        // GET: api/maintenance/{id}
+        // GET: maintenance/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<MaintenanceRequest>> GetMaintenanceRequest(int id)
         {
@@ -43,20 +43,33 @@ namespace CarManagementApi.Controllers
             return request;
         }
 
-        // POST: api/maintenance
+        // POST: maintenance
         [HttpPost]
         public async Task<ActionResult<MaintenanceRequest>> CreateMaintenanceRequest(MaintenanceRequest request)
         {
-            var requestsOnDate = await _context.MaintenanceRequests
-                .Where(m => m.GarageId == request.GarageId && m.ScheduledDate == request.ScheduledDate)
-                .CountAsync();
+            var car = await _context.Cars.FindAsync(request.CarId);
+            if (car == null)
+            {
+                return BadRequest("The selected car does not exist.");
+            }
 
             var garage = await _context.Garages.FindAsync(request.GarageId);
+            if (garage == null)
+            {
+                return BadRequest("The selected garage does not exist.");
+            }
 
-            if (garage == null || requestsOnDate >= garage.Capacity)
+            var requestsOnDate = await _context.MaintenanceRequests
+                .Where(m => m.GarageId == request.GarageId && m.ScheduledDate.Date == request.ScheduledDate.Date)
+                .CountAsync();
+
+            if (requestsOnDate >= garage.Capacity)
             {
                 return BadRequest("No available capacity for the selected garage and date.");
             }
+
+            request.Car = car;
+            request.Garage = garage;
 
             _context.MaintenanceRequests.Add(request);
             await _context.SaveChangesAsync();
@@ -64,16 +77,53 @@ namespace CarManagementApi.Controllers
             return CreatedAtAction(nameof(GetMaintenanceRequest), new { id = request.Id }, request);
         }
 
-        // PUT: api/maintenance/{id}
+
+        // PUT: maintenance/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateMaintenanceRequest(int id, MaintenanceRequest request)
         {
+            
             if (id != request.Id)
             {
                 return BadRequest("Request ID mismatch.");
             }
 
-            _context.Entry(request).State = EntityState.Modified;
+            var existingRequest = await _context.MaintenanceRequests
+                .Include(m => m.Car)
+                .Include(m => m.Garage)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
+            if (existingRequest == null)
+            {
+                return NotFound("Maintenance request not found.");
+            }
+
+            existingRequest.ServiceType = request.ServiceType;
+            existingRequest.ScheduledDate = request.ScheduledDate;
+
+            if (existingRequest.CarId != request.CarId)
+            {
+                var car = await _context.Cars.FindAsync(request.CarId);
+                if (car == null)
+                {
+                    return BadRequest("The selected car does not exist.");
+                }
+                existingRequest.CarId = car.Id;
+                existingRequest.Car = car;
+            }
+
+            if (existingRequest.GarageId != request.GarageId)
+            {
+                var garage = await _context.Garages.FindAsync(request.GarageId);
+                if (garage == null)
+                {
+                    return BadRequest("The selected garage does not exist.");
+                }
+                existingRequest.GarageId = garage.Id;
+                existingRequest.Garage = garage;
+            }
+
+            _context.Entry(existingRequest).State = EntityState.Modified;
 
             try
             {
@@ -94,7 +144,7 @@ namespace CarManagementApi.Controllers
             return NoContent();
         }
 
-        // DELETE: api/maintenance/{id}
+        // DELETE: maintenance/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMaintenanceRequest(int id)
         {

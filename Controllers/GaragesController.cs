@@ -16,14 +16,14 @@ namespace CarManagementApi.Controllers
             _context = context;
         }
 
-        // GET: api/garages
+        // GET: garages
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Garage>>> GetGarages()
         {
             return await _context.Garages.ToListAsync();
         }
 
-        // GET: api/garages/{id}
+        // GET: garages/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<Garage>> GetGarage(int id)
         {
@@ -37,7 +37,7 @@ namespace CarManagementApi.Controllers
             return garage;
         }
 
-        // POST: api/garages
+        // POST: garages
         [HttpPost]
         public async Task<ActionResult<Garage>> CreateGarage(Garage garage)
         {
@@ -47,7 +47,7 @@ namespace CarManagementApi.Controllers
             return CreatedAtAction(nameof(GetGarage), new { id = garage.Id }, garage);
         }
 
-        // PUT: api/garages/{id}
+        // PUT: garages/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateGarage(int id, Garage garage)
         {
@@ -77,7 +77,7 @@ namespace CarManagementApi.Controllers
             return NoContent();
         }
 
-        // DELETE: api/garages/{id}
+        // DELETE: garages/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteGarage(int id)
         {
