@@ -166,6 +166,30 @@ namespace CarManagementApi.Controllers
             return _context.MaintenanceRequests.Any(e => e.Id == id);
         }
 
+
+        [HttpGet("filter")]
+        public async Task<ActionResult<IEnumerable<MaintenanceRequest>>> FilterMaintenanceRequests([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate)
+        {
+            if (!startDate.HasValue || !endDate.HasValue)
+            {
+                return BadRequest("Both startDate and endDate must be provided.");
+            }
+
+            var requests = await _context.MaintenanceRequests
+                .Include(m => m.Car)
+                .Include(m => m.Garage)
+                .Where(m => m.ScheduledDate >= startDate.Value && m.ScheduledDate <= endDate.Value)
+                .ToListAsync();
+
+            if (!requests.Any())
+            {
+                return NotFound("No maintenance requests found for the specified date range.");
+            }
+
+            return Ok(requests);
+        }
+
+
         [HttpGet("monthly-statistics")]
         public async Task<ActionResult<IEnumerable<object>>> GetMonthlyStatistics([FromQuery] int garageId, [FromQuery] DateTime startMonth, [FromQuery] DateTime endMonth)
         {
